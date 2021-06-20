@@ -44,5 +44,10 @@
         /// Moves next byte in memory to register L
         /// </summary>
         public const byte MVI_L = 0x2E;
+
+        /// <summary>
+        /// Moves byte in register B to register A
+        /// </summary>
+        public const byte MOV_A_B = 0x78;
     }
 }

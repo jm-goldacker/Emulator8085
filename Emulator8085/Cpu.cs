@@ -5,7 +5,7 @@ namespace Emulator8085
     /// <summary>
     /// The 8085 CPU
     /// </summary>
-    unsafe class Cpu
+    class Cpu
     {
         // Registers
         private byte A;
@@ -24,16 +24,11 @@ namespace Emulator8085
         // Bus which connects other components with the CPU
         private Bus bus;
 
-        // the instruction set
-        private InstructionSet instructionSet;
-
         /// <summary>
         /// Creates a new Cpu and sets the program counter to the first adress of the RAM.
         /// </summary>
         public Cpu()
         {
-            instructionSet = new();
-
             IC = 0x2000;
         }
 
@@ -105,38 +100,35 @@ namespace Emulator8085
             switch (instruction)
             {
                 case InstructionSet.MVI_A:
-                    fixed (byte* p = &A)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref A);
                     break;
 
                 case InstructionSet.MVI_B:
-                    fixed (byte* p = &B)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref B);
                     break;
 
                 case InstructionSet.MVI_C:
-                    fixed (byte* p = &C)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref C);
                     break;
 
                 case InstructionSet.MVI_D:
-                    fixed (byte* p = &D)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref D);
                     break;
 
                 case InstructionSet.MVI_E:
-                    fixed (byte* p = &E)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref E);
                     break;
 
                 case InstructionSet.MVI_H:
-                    fixed (byte* p = &H)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref H);
                     break;
 
                 case InstructionSet.MVI_L:
-                    fixed (byte* p = &L)
-                        TryMoveNextByteInMemoryTo(p);
+                    TryMoveNextByteInMemoryTo(ref L);
+                    break;
+
+                case InstructionSet.MOV_A_B:
+                    MoveFromTo(B, ref A);
                     break;
 
                 default:
@@ -152,7 +144,7 @@ namespace Emulator8085
         /// </summary>
         /// <param name="register">register to which the next byte should be written to</param>
         /// <returns>true, if reading was successfull; otherwise false</returns>
-        private bool TryMoveNextByteInMemoryTo(byte* register)
+        private bool TryMoveNextByteInMemoryTo(ref byte register)
         {
             IC += 0x0001;
             byte? data = bus.ReadFromMemory(IC);
@@ -160,8 +152,13 @@ namespace Emulator8085
             if (data == null)
                 return false;
 
-            *register = (byte)data;
+            register = (byte)data;
             return true;
+        }
+
+        private void MoveFromTo(byte sourceRegister, ref byte destinationRegister)
+        {
+            destinationRegister = sourceRegister;
         }
     }
 }
