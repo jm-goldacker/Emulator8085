@@ -1,4 +1,6 @@
-﻿namespace Emulator8085
+﻿using System;
+
+namespace Emulator8085
 {
     /// <summary>
     /// Bus that connects the components.
@@ -38,10 +40,14 @@
         /// </summary>
         /// <param name="adress">adress to read from</param>
         /// <returns>the data that is stored in the RAM at the given adress</returns>
-        public byte ReadFromMemory(ushort adress)
+        public byte? ReadFromMemory(ushort adress)
         {
-            // TODO Make sure that the adress is between 0x2000 and 0x27FF
-            // TODO Maybe map the RAM adress to 0 - 2047
+            if (adress < 0x2000 || adress > 0x27FF)
+            {
+                Console.WriteLine("Invalid RAM adress!");
+                return null;
+            }
+
             return memory.Read(adress);
         }
 
@@ -50,11 +56,17 @@
         /// </summary>
         /// <param name="adress">adress to write at</param>
         /// <param name="data">data to write</param>
-        public void WriteToMemory(ushort adress, byte data)
+        /// <returns>true, if writing was successfull, otherwise false</returns>
+        public bool TryWriteToMemory(ushort adress, byte data)
         {
-            // TODO Make sure that the adress is between 0x2000 and 0x27FF
-            // TODO Maybe map the RAM adress to 0 - 2047
+            if (adress < 0x2000 || adress > 0x27FF)
+            {
+                Console.WriteLine("Invalid RAM adress!");
+                return false;
+            }
+
             memory.Write(adress, data);
+            return true;
         }
     }
 }

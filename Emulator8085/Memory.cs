@@ -6,6 +6,7 @@
     class Memory
     {
         private byte[] data = new byte[2048];
+        private const ushort offset = 0x2000;
 
         /// <summary>
         /// Returns the data stored at the given adress.
@@ -24,7 +25,7 @@
         /// <param name="data">data to write</param>
         public void Write(ushort adress, byte data)
         {
-            this.data[adress - 0x2000] = data;
+            this.data[adress - offset] = data;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Emulator8085
         private byte L;
 
         // Program Counter
-        private ushort PC;
+        private ushort IC;
         // Stack Pointer
         private ushort SP;
 
@@ -34,7 +34,7 @@ namespace Emulator8085
         {
             instructionSet = new();
 
-            PC = 0x2000;
+            IC = 0x2000;
         }
 
         /// <summary>
@@ -51,11 +51,11 @@ namespace Emulator8085
         /// </summary>
         public void Reset()
         {
-            PC = 0x2000;
+            IC = 0x2000;
 
             for (ushort i = 0x2000; i < 0x27FF; i += 0x0001)
             {
-                bus.WriteToMemory(i, 0x0000);
+                bus.TryWriteToMemory(i, 0x0000);
             }
         }
 
@@ -64,80 +64,104 @@ namespace Emulator8085
         /// </summary>
         public void Execute()
         {
-            byte currentInstruction = bus.ReadFromMemory(PC);
+            byte? currentInstruction = bus.ReadFromMemory(IC);
 
             while (currentInstruction != InstructionSet.HALT)
             {
-                ExecuteInstruction(currentInstruction);
+                PrintRegisters();
+                
+                if (currentInstruction == null || !TryExecuteInstruction((byte)currentInstruction))
+                    break;
 
-                PC += 0x0001;
-                currentInstruction = bus.ReadFromMemory(PC);
+                IC += 0x0001;
+                currentInstruction = bus.ReadFromMemory(IC);
             }
 
-            // Debug
-            Console.WriteLine($"A: {A}");
-            Console.WriteLine($"B: {B}");
-            Console.WriteLine($"C: {C}");
-            Console.WriteLine($"D: {D}");
-            Console.WriteLine($"E: {E}");
-            Console.WriteLine($"H: {H}");
-            Console.WriteLine($"L: {L}");
+            PrintRegisters();
+        }
+
+        private void PrintRegisters()
+        {
+            Console.WriteLine("-------------------");
+            Console.WriteLine($"A: 0x{A:X2}");
+            Console.WriteLine($"B: 0x{B:X2}");
+            Console.WriteLine($"C: 0x{C:X2}");
+            Console.WriteLine($"D: 0x{D:X2}");
+            Console.WriteLine($"E: 0x{E:X2}");
+            Console.WriteLine($"H: 0x{H:X2}");
+            Console.WriteLine($"L: 0x{L:X2}");
+            Console.WriteLine($"IC: 0x{IC:X4}");
+            Console.WriteLine($"SP: 0x{SP:X4}");
+            Console.WriteLine("-------------------\n");
         }
 
         /// <summary>
         /// Executes the given instruction.
         /// </summary>
         /// <param name="instruction">the instruction to execute</param>
-        private void ExecuteInstruction(byte instruction)
+        /// <returns>true, if execution was successfull; otherwise false</returns>
+        private bool TryExecuteInstruction(byte instruction)
         {
             switch (instruction)
             {
                 case InstructionSet.MVI_A:
                     fixed (byte* p = &A)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_B:
                     fixed (byte* p = &B)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_C:
                     fixed (byte* p = &C)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_D:
                     fixed (byte* p = &D)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_E:
                     fixed (byte* p = &E)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_H:
                     fixed (byte* p = &H)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
 
                 case InstructionSet.MVI_L:
                     fixed (byte* p = &L)
-                        MoveNextByteInMemoryTo(p);
+                        TryMoveNextByteInMemoryTo(p);
                     break;
+
+                default:
+                    Console.WriteLine("Unknown instruction. Stopping programm!");
+                    return false;
             }
+
+            return true;
         }
 
         /// <summary>
         /// Writes the next byte in the RAM to the given register
         /// </summary>
         /// <param name="register">register to which the next byte should be written to</param>
-        private void MoveNextByteInMemoryTo(byte* register)
+        /// <returns>true, if reading was successfull; otherwise false</returns>
+        private bool TryMoveNextByteInMemoryTo(byte* register)
         {
-            PC += 0x0001;
-            byte data = bus.ReadFromMemory(PC);
-            *register = data;
+            IC += 0x0001;
+            byte? data = bus.ReadFromMemory(IC);
+            
+            if (data == null)
+                return false;
+
+            *register = (byte)data;
+            return true;
         }
     }
 }

@@ -14,9 +14,9 @@
         {
             var bus = new Bus();
 
-            bus.WriteToMemory(0x2000, InstructionSet.MVI_A);
-            bus.WriteToMemory(0x2001, 0x42);
-            bus.WriteToMemory(0x2002, InstructionSet.HALT);
+            bus.TryWriteToMemory(0x2000, InstructionSet.MVI_A);
+            bus.TryWriteToMemory(0x2001, 0x42);
+            bus.TryWriteToMemory(0x2002, InstructionSet.HALT);
 
             bus.ConnectComponents();
 
