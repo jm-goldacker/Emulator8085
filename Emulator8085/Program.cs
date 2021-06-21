@@ -1,4 +1,6 @@
-﻿namespace Emulator8085
+﻿using System;
+
+namespace Emulator8085
 {
     /// <summary>
     /// entry point for the emulator
@@ -14,14 +16,21 @@
         {
             var bus = new Bus();
 
-            bus.TryWriteToMemory(0x2000, InstructionSet.MVI_B);
-            bus.TryWriteToMemory(0x2001, 0x42);
-            bus.TryWriteToMemory(0x2002, InstructionSet.MOV_A_B);
-            bus.TryWriteToMemory(0x2003, InstructionSet.HALT);
+            bus.TryWriteToMemory(0x2000, InstructionSet.MVI_H);
+            bus.TryWriteToMemory(0x2001, 0x27);
+            bus.TryWriteToMemory(0x2002, InstructionSet.MVI_L);
+            bus.TryWriteToMemory(0x2003, 0xFF);
+            bus.TryWriteToMemory(0x2004, InstructionSet.MVI_A);
+            bus.TryWriteToMemory(0x2005, 0x42);
+            bus.TryWriteToMemory(0x2006, InstructionSet.MOV_M_A);
+            bus.TryWriteToMemory(0x2007, InstructionSet.MOV_B_M);
+            bus.TryWriteToMemory(0x2008, InstructionSet.HALT);
 
             bus.ConnectComponents();
 
             bus.ExecuteProgram();
+
+            Console.WriteLine(bus.ReadFromMemory(0x27FF));
         }
     }
 }

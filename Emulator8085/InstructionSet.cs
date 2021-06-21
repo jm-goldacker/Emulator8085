@@ -325,6 +325,41 @@
         /// </summary>
         public const byte MOV_M_L = 0x75;
 
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register A
+        /// </summary>
+        public const byte MOV_A_M = 0x7E;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register B
+        /// </summary>
+        public const byte MOV_B_M = 0x46;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register C
+        /// </summary>
+        public const byte MOV_C_M = 0x4E;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register D
+        /// </summary>
+        public const byte MOV_D_M = 0x56;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register E
+        /// </summary>
+        public const byte MOV_E_M = 0x5E;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register H
+        /// </summary>
+        public const byte MOV_H_M = 0x66;
+
+        /// <summary>
+        /// Writes content of RAM adress specified in H and L to register L
+        /// </summary>
+        public const byte MOV_L_M = 0x6E;
+
 
     }
 }

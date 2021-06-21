@@ -50,7 +50,7 @@ namespace Emulator8085
 
             for (ushort i = 0x2000; i < 0x27FF; i += 0x0001)
             {
-                bus.TryWriteToMemory(i, 0x0000);
+                bus.TryWriteToMemory(i, 0);
             }
         }
 
@@ -65,7 +65,9 @@ namespace Emulator8085
             {
                 PrintRegisters();
                 
-                if (currentInstruction == null || !TryExecuteInstruction((byte)currentInstruction))
+                if (currentInstruction == null 
+                    || currentInstruction == 0
+                    || !TryExecuteInstruction((byte)currentInstruction))
                     break;
 
                 IC += 0x0001;
@@ -100,257 +102,268 @@ namespace Emulator8085
             switch (instruction)
             {
                 case InstructionSet.MVI_A:
-                    TryMoveNextByteInMemoryTo(ref A);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref A);
 
                 case InstructionSet.MVI_B:
-                    TryMoveNextByteInMemoryTo(ref B);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref B);
 
                 case InstructionSet.MVI_C:
-                    TryMoveNextByteInMemoryTo(ref C);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref C);
 
                 case InstructionSet.MVI_D:
-                    TryMoveNextByteInMemoryTo(ref D);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref D);
 
                 case InstructionSet.MVI_E:
-                    TryMoveNextByteInMemoryTo(ref E);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref E);
 
                 case InstructionSet.MVI_H:
-                    TryMoveNextByteInMemoryTo(ref H);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref H);
 
                 case InstructionSet.MVI_L:
-                    TryMoveNextByteInMemoryTo(ref L);
-                    break;
+                    return TryMoveNextByteInMemoryTo(ref L);
 
                 case InstructionSet.MOV_A_A:
-                    MoveToFrom(ref A, A);
-                    break;
+                    MoveToRegisterFromRegister(ref A, A);
+                    return true;
 
                 case InstructionSet.MOV_A_B:
-                    MoveToFrom(ref A, B);
-                    break;
+                    MoveToRegisterFromRegister(ref A, B);
+                    return true; 
 
                 case InstructionSet.MOV_A_C:
-                    MoveToFrom(ref A, C);
-                    break;
+                    MoveToRegisterFromRegister(ref A, C);
+                    return true;
 
                 case InstructionSet.MOV_A_D:
-                    MoveToFrom(ref A, D);
-                    break;
+                    MoveToRegisterFromRegister(ref A, D);
+                    return true;
 
                 case InstructionSet.MOV_A_E:
-                    MoveToFrom(ref A, E);
-                    break;
+                    MoveToRegisterFromRegister(ref A, E);
+                    return true;
 
                 case InstructionSet.MOV_A_H:
-                    MoveToFrom(ref A, H);
-                    break;
+                    MoveToRegisterFromRegister(ref A, H);
+                    return true;
 
                 case InstructionSet.MOV_A_L:
-                    MoveToFrom(ref A, L);
-                    break;
+                    MoveToRegisterFromRegister(ref A, L);
+                    return true;
 
                 case InstructionSet.MOV_B_A:
-                    MoveToFrom(ref B, A);
-                    break;
+                    MoveToRegisterFromRegister(ref B, A);
+                    return true;
 
                 case InstructionSet.MOV_B_B:
-                    MoveToFrom(ref B, B);
-                    break;
+                    MoveToRegisterFromRegister(ref B, B);
+                    return true;
 
                 case InstructionSet.MOV_B_C:
-                    MoveToFrom(ref B, C);
-                    break;
+                    MoveToRegisterFromRegister(ref B, C);
+                    return true;
 
                 case InstructionSet.MOV_B_D:
-                    MoveToFrom(ref B, D);
-                    break;
+                    MoveToRegisterFromRegister(ref B, D);
+                    return true;
 
                 case InstructionSet.MOV_B_E:
-                    MoveToFrom(ref B, E);
-                    break;
+                    MoveToRegisterFromRegister(ref B, E);
+                    return true;
 
                 case InstructionSet.MOV_B_H:
-                    MoveToFrom(ref B, H);
-                    break;
+                    MoveToRegisterFromRegister(ref B, H);
+                    return true;
 
                 case InstructionSet.MOV_B_L:
-                    MoveToFrom(ref B, L);
-                    break;
+                    MoveToRegisterFromRegister(ref B, L);
+                    return true;
 
                 case InstructionSet.MOV_C_A:
-                    MoveToFrom(ref C, A);
-                    break;
+                    MoveToRegisterFromRegister(ref C, A);
+                    return true;
 
                 case InstructionSet.MOV_C_B:
-                    MoveToFrom(ref C, B);
-                    break;
+                    MoveToRegisterFromRegister(ref C, B);
+                    return true;
 
                 case InstructionSet.MOV_C_C:
-                    MoveToFrom(ref C, C);
-                    break;
+                    MoveToRegisterFromRegister(ref C, C);
+                    return true;
 
                 case InstructionSet.MOV_C_D:
-                    MoveToFrom(ref C, D);
-                    break;
+                    MoveToRegisterFromRegister(ref C, D);
+                    return true;
 
                 case InstructionSet.MOV_C_E:
-                    MoveToFrom(ref C, E);
-                    break;
+                    MoveToRegisterFromRegister(ref C, E);
+                    return true;
 
                 case InstructionSet.MOV_C_H:
-                    MoveToFrom(ref C, H);
-                    break;
+                    MoveToRegisterFromRegister(ref C, H);
+                    return true;
 
                 case InstructionSet.MOV_C_L:
-                    MoveToFrom(ref C, L);
-                    break;
+                    MoveToRegisterFromRegister(ref C, L);
+                    return true;
 
                 case InstructionSet.MOV_D_A:
-                    MoveToFrom(ref D, A);
-                    break;
+                    MoveToRegisterFromRegister(ref D, A);
+                    return true;
 
                 case InstructionSet.MOV_D_B:
-                    MoveToFrom(ref D, B);
-                    break;
+                    MoveToRegisterFromRegister(ref D, B);
+                    return true;
 
                 case InstructionSet.MOV_D_C:
-                    MoveToFrom(ref D, C);
-                    break;
+                    MoveToRegisterFromRegister(ref D, C);
+                    return true;
 
                 case InstructionSet.MOV_D_D:
-                    MoveToFrom(ref D, D);
-                    break;
+                    MoveToRegisterFromRegister(ref D, D);
+                    return true;
 
                 case InstructionSet.MOV_D_E:
-                    MoveToFrom(ref D, E);
-                    break;
+                    MoveToRegisterFromRegister(ref D, E);
+                    return true;
 
                 case InstructionSet.MOV_D_H:
-                    MoveToFrom(ref D, H);
-                    break;
+                    MoveToRegisterFromRegister(ref D, H);
+                    return true;
 
                 case InstructionSet.MOV_D_L:
-                    MoveToFrom(ref D, L);
-                    break;
+                    MoveToRegisterFromRegister(ref D, L);
+                    return true;
 
                 case InstructionSet.MOV_E_A:
-                    MoveToFrom(ref E, A);
-                    break;
+                    MoveToRegisterFromRegister(ref E, A);
+                    return true;
 
                 case InstructionSet.MOV_E_B:
-                    MoveToFrom(ref E, B);
-                    break;
+                    MoveToRegisterFromRegister(ref E, B);
+                    return true;
 
                 case InstructionSet.MOV_E_C:
-                    MoveToFrom(ref E, C);
-                    break;
+                    MoveToRegisterFromRegister(ref E, C);
+                    return true;
 
                 case InstructionSet.MOV_E_D:
-                    MoveToFrom(ref E, D);
-                    break;
+                    MoveToRegisterFromRegister(ref E, D);
+                    return true;
 
                 case InstructionSet.MOV_E_E:
-                    MoveToFrom(ref E, E);
-                    break;
+                    MoveToRegisterFromRegister(ref E, E);
+                    return true;
 
                 case InstructionSet.MOV_E_H:
-                    MoveToFrom(ref E, H);
-                    break;
+                    MoveToRegisterFromRegister(ref E, H);
+                    return true;
 
                 case InstructionSet.MOV_E_L:
-                    MoveToFrom(ref E, L);
-                    break;
+                    MoveToRegisterFromRegister(ref E, L);
+                    return true;
 
                 case InstructionSet.MOV_H_A:
-                    MoveToFrom(ref H, A);
-                    break;
+                    MoveToRegisterFromRegister(ref H, A);
+                    return true;
 
                 case InstructionSet.MOV_H_B:
-                    MoveToFrom(ref H, B);
-                    break;
+                    MoveToRegisterFromRegister(ref H, B);
+                    return true;
 
                 case InstructionSet.MOV_H_C:
-                    MoveToFrom(ref H, C);
-                    break;
+                    MoveToRegisterFromRegister(ref H, C);
+                    return true;
 
                 case InstructionSet.MOV_H_D:
-                    MoveToFrom(ref H, D);
-                    break;
+                    MoveToRegisterFromRegister(ref H, D);
+                    return true;
 
                 case InstructionSet.MOV_H_E:
-                    MoveToFrom(ref H, E);
-                    break;
+                    MoveToRegisterFromRegister(ref H, E);
+                    return true;
 
                 case InstructionSet.MOV_H_H:
-                    MoveToFrom(ref H, H);
-                    break;
+                    MoveToRegisterFromRegister(ref H, H);
+                    return true;
 
                 case InstructionSet.MOV_H_L:
-                    MoveToFrom(ref H, L);
-                    break;
+                    MoveToRegisterFromRegister(ref H, L);
+                    return true;
 
                 case InstructionSet.MOV_L_A:
-                    MoveToFrom(ref L, A);
-                    break;
+                    MoveToRegisterFromRegister(ref L, A);
+                    return true;
 
                 case InstructionSet.MOV_L_B:
-                    MoveToFrom(ref L, B);
-                    break;
+                    MoveToRegisterFromRegister(ref L, B);
+                    return true;
 
                 case InstructionSet.MOV_L_C:
-                    MoveToFrom(ref L, C);
-                    break;
+                    MoveToRegisterFromRegister(ref L, C);
+                    return true;
 
                 case InstructionSet.MOV_L_D:
-                    MoveToFrom(ref L, D);
-                    break;
+                    MoveToRegisterFromRegister(ref L, D);
+                    return true;
 
                 case InstructionSet.MOV_L_E:
-                    MoveToFrom(ref L, E);
-                    break;
+                    MoveToRegisterFromRegister(ref L, E);
+                    return true;
 
                 case InstructionSet.MOV_L_H:
-                    MoveToFrom(ref L, H);
-                    break;
+                    MoveToRegisterFromRegister(ref L, H);
+                    return true;
 
                 case InstructionSet.MOV_L_L:
-                    MoveToFrom(ref L, L);
-                    break;
+                    MoveToRegisterFromRegister(ref L, L);
+                    return true;
 
-                    /*
                 case InstructionSet.MOV_M_A:
-                    break;
+                    return TryMoveFromRegisterToMemory(A);
 
                 case InstructionSet.MOV_M_B:
-                    break;
+                    return TryMoveFromRegisterToMemory(B);
 
                 case InstructionSet.MOV_M_C:
-                    break;
+                    return TryMoveFromRegisterToMemory(C);
 
                 case InstructionSet.MOV_M_D:
-                    break;
+                    return TryMoveFromRegisterToMemory(D);
 
                 case InstructionSet.MOV_M_E:
-                    break;
+                    return TryMoveFromRegisterToMemory(E);
 
                 case InstructionSet.MOV_M_H:
-                    break;
+                    return TryMoveFromRegisterToMemory(H);
 
                 case InstructionSet.MOV_M_L:
-                    break;
-                    */
+                    return TryMoveFromRegisterToMemory(L);
+
+                case InstructionSet.MOV_A_M:
+                    return TryMoveFromMemoryToRegister(ref A);
+
+                case InstructionSet.MOV_B_M:
+                    return TryMoveFromMemoryToRegister(ref B);
+
+                case InstructionSet.MOV_C_M:
+                    return TryMoveFromMemoryToRegister(ref C);
+
+                case InstructionSet.MOV_D_M:
+                    return TryMoveFromMemoryToRegister(ref D);
+
+                case InstructionSet.MOV_E_M:
+                    return TryMoveFromMemoryToRegister(ref E);
+
+                case InstructionSet.MOV_H_M:
+                    return TryMoveFromMemoryToRegister(ref H);
+
+                case InstructionSet.MOV_L_M:
+                    return TryMoveFromMemoryToRegister(ref L);
+
                 default:
                     Console.WriteLine("Unknown instruction. Stopping programm!");
                     return false;
             }
-
-            return true;
         }
 
         /// <summary>
@@ -370,9 +383,31 @@ namespace Emulator8085
             return true;
         }
 
-        private void MoveToFrom(ref byte destinationRegister, byte sourceRegister)
+        private void MoveToRegisterFromRegister(ref byte destinationRegister, byte sourceRegister)
         {
             destinationRegister = sourceRegister;
+        }
+
+        private bool TryMoveFromRegisterToMemory(byte sourceRegister)
+        {
+            ushort memoryAdress = (ushort)(H << 8);
+            memoryAdress = (ushort)(memoryAdress | L);
+
+            return bus.TryWriteToMemory(memoryAdress, sourceRegister);
+        }
+
+        private bool TryMoveFromMemoryToRegister(ref byte destinationRegister)
+        {
+            ushort memoryAdress = (ushort)(H << 8);
+            memoryAdress = (ushort)(memoryAdress | L);
+
+            var data = bus.ReadFromMemory(memoryAdress);
+
+            if (data == null)
+                return false;
+
+            destinationRegister = (byte)data;
+            return true;
         }
     }
 }
