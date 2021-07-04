@@ -10,6 +10,14 @@
         /// </summary>
         public const byte HALT = 0x76;
 
+        public const byte MOV = 0b01000000;
+
+        public const byte MOV_r_M = 0b01000110;
+
+        public const byte MOV_M_r = 0b01110000;
+
+        public const byte MVI = 0b00000110;
+
         /// <summary>
         /// Moves next byte in memory to register A
         /// </summary>

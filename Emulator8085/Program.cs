@@ -16,15 +16,15 @@ namespace Emulator8085
         {
             var bus = new Bus();
 
-            bus.TryWriteToMemory(0x2000, InstructionSet.MVI_H);
-            bus.TryWriteToMemory(0x2001, 0x27);
-            bus.TryWriteToMemory(0x2002, InstructionSet.MVI_L);
-            bus.TryWriteToMemory(0x2003, 0xFF);
-            bus.TryWriteToMemory(0x2004, InstructionSet.MVI_A);
-            bus.TryWriteToMemory(0x2005, 0x42);
-            bus.TryWriteToMemory(0x2006, InstructionSet.MOV_M_A);
-            bus.TryWriteToMemory(0x2007, InstructionSet.MOV_B_M);
-            bus.TryWriteToMemory(0x2008, InstructionSet.HALT);
+            bus.WriteToMemory(0x2000, InstructionSet.MVI_H);
+            bus.WriteToMemory(0x2001, 0x27);
+            bus.WriteToMemory(0x2002, InstructionSet.MVI_L);
+            bus.WriteToMemory(0x2003, 0xFF);
+            bus.WriteToMemory(0x2004, InstructionSet.MVI_A);
+            bus.WriteToMemory(0x2005, 0x42);
+            bus.WriteToMemory(0x2006, InstructionSet.MOV_M_A);
+            bus.WriteToMemory(0x2007, InstructionSet.MOV_B_M);
+            bus.WriteToMemory(0x2008, InstructionSet.HALT);
 
             bus.ConnectComponents();
 

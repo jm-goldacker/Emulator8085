@@ -40,13 +40,10 @@ namespace Emulator8085
         /// </summary>
         /// <param name="adress">adress to read from</param>
         /// <returns>the data that is stored in the RAM at the given adress</returns>
-        public byte? ReadFromMemory(ushort adress)
+        public byte ReadFromMemory(ushort adress)
         {
             if (adress < 0x2000 || adress > 0x27FF)
-            {
-                Console.WriteLine("Invalid RAM adress!");
-                return null;
-            }
+                throw new ArgumentException($"Invalid RAM adress! (0x{adress:X2}");
 
             return memory.Read(adress);
         }
@@ -56,17 +53,12 @@ namespace Emulator8085
         /// </summary>
         /// <param name="adress">adress to write at</param>
         /// <param name="data">data to write</param>
-        /// <returns>true, if writing was successfull, otherwise false</returns>
-        public bool TryWriteToMemory(ushort adress, byte data)
+        public void WriteToMemory(ushort adress, byte data)
         {
             if (adress < 0x2000 || adress > 0x27FF)
-            {
-                Console.WriteLine("Invalid RAM adress!");
-                return false;
-            }
+                throw new ArgumentException($"Invalid RAM adress! (0x{adress:X2}");
 
             memory.Write(adress, data);
-            return true;
         }
     }
 }

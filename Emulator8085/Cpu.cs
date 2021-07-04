@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Emulator8085.Masks;
+using System;
+using System.Collections.Generic;
 
 namespace Emulator8085
 {
@@ -8,13 +10,16 @@ namespace Emulator8085
     class Cpu
     {
         // Registers
-        private byte A;
-        private byte B;
-        private byte C;
-        private byte D;
-        private byte E;
-        private byte H;
-        private byte L;
+        private Dictionary<byte, byte> registers = new Dictionary<byte, byte>
+        {
+            { 0b111, 0 }, // A
+            { 0b000, 0 }, // B 
+            { 0b001, 0 }, // C
+            { 0b010, 0 }, // D
+            { 0b011, 0 }, // E
+            { 0b100, 0 }, // H
+            { 0b101, 0 }, // L
+        };
 
         // Program Counter
         private ushort IC;
@@ -50,7 +55,7 @@ namespace Emulator8085
 
             for (ushort i = 0x2000; i < 0x27FF; i += 0x0001)
             {
-                bus.TryWriteToMemory(i, 0);
+                bus.WriteToMemory(i, 0);
             }
         }
 
@@ -80,13 +85,13 @@ namespace Emulator8085
         private void PrintRegisters()
         {
             Console.WriteLine("-------------------");
-            Console.WriteLine($"A: 0x{A:X2}");
-            Console.WriteLine($"B: 0x{B:X2}");
-            Console.WriteLine($"C: 0x{C:X2}");
-            Console.WriteLine($"D: 0x{D:X2}");
-            Console.WriteLine($"E: 0x{E:X2}");
-            Console.WriteLine($"H: 0x{H:X2}");
-            Console.WriteLine($"L: 0x{L:X2}");
+            Console.WriteLine($"A: 0x{registers[(byte)Registers.A]:X2}");
+            Console.WriteLine($"B: 0x{registers[(byte)Registers.B]:X2}");
+            Console.WriteLine($"C: 0x{registers[(byte)Registers.C]:X2}");
+            Console.WriteLine($"D: 0x{registers[(byte)Registers.D]:X2}");
+            Console.WriteLine($"E: 0x{registers[(byte)Registers.E]:X2}");
+            Console.WriteLine($"H: 0x{registers[(byte)Registers.H]:X2}");
+            Console.WriteLine($"L: 0x{registers[(byte)Registers.L]:X2}");
             Console.WriteLine($"IC: 0x{IC:X4}");
             Console.WriteLine($"SP: 0x{SP:X4}");
             Console.WriteLine("-------------------\n");
@@ -99,271 +104,52 @@ namespace Emulator8085
         /// <returns>true, if execution was successfull; otherwise false</returns>
         private bool TryExecuteInstruction(byte instruction)
         {
+            if ((instruction & (byte)Masks.Opcodes.MOV) == InstructionSet.MOV)
+            {
+                var source = (byte)(instruction & 0b00000111);
+                var destination = (byte)((instruction >> 3) & 0b00000111);
+                return TryMoveFromTo(destination, source);
+            }
+
+            if ((instruction & (byte)Masks.Opcodes.MVI) == InstructionSet.MVI)
+            {
+                var destination = (byte)((instruction >> 3));
+
+                if (destination == 0b110)
+                    return TryMoveNextByteInMemoryToMemory();
+
+                return TryMoveNextByteInMemoryToRegister(destination);
+            }
+
             switch (instruction)
             {
-                case InstructionSet.MVI_A:
-                    return TryMoveNextByteInMemoryTo(ref A);
-
-                case InstructionSet.MVI_B:
-                    return TryMoveNextByteInMemoryTo(ref B);
-
-                case InstructionSet.MVI_C:
-                    return TryMoveNextByteInMemoryTo(ref C);
-
-                case InstructionSet.MVI_D:
-                    return TryMoveNextByteInMemoryTo(ref D);
-
-                case InstructionSet.MVI_E:
-                    return TryMoveNextByteInMemoryTo(ref E);
-
-                case InstructionSet.MVI_H:
-                    return TryMoveNextByteInMemoryTo(ref H);
-
-                case InstructionSet.MVI_L:
-                    return TryMoveNextByteInMemoryTo(ref L);
-
-                case InstructionSet.MOV_A_A:
-                    MoveToRegisterFromRegister(ref A, A);
-                    return true;
-
-                case InstructionSet.MOV_A_B:
-                    MoveToRegisterFromRegister(ref A, B);
-                    return true; 
-
-                case InstructionSet.MOV_A_C:
-                    MoveToRegisterFromRegister(ref A, C);
-                    return true;
-
-                case InstructionSet.MOV_A_D:
-                    MoveToRegisterFromRegister(ref A, D);
-                    return true;
-
-                case InstructionSet.MOV_A_E:
-                    MoveToRegisterFromRegister(ref A, E);
-                    return true;
-
-                case InstructionSet.MOV_A_H:
-                    MoveToRegisterFromRegister(ref A, H);
-                    return true;
-
-                case InstructionSet.MOV_A_L:
-                    MoveToRegisterFromRegister(ref A, L);
-                    return true;
-
-                case InstructionSet.MOV_B_A:
-                    MoveToRegisterFromRegister(ref B, A);
-                    return true;
-
-                case InstructionSet.MOV_B_B:
-                    MoveToRegisterFromRegister(ref B, B);
-                    return true;
-
-                case InstructionSet.MOV_B_C:
-                    MoveToRegisterFromRegister(ref B, C);
-                    return true;
-
-                case InstructionSet.MOV_B_D:
-                    MoveToRegisterFromRegister(ref B, D);
-                    return true;
-
-                case InstructionSet.MOV_B_E:
-                    MoveToRegisterFromRegister(ref B, E);
-                    return true;
-
-                case InstructionSet.MOV_B_H:
-                    MoveToRegisterFromRegister(ref B, H);
-                    return true;
-
-                case InstructionSet.MOV_B_L:
-                    MoveToRegisterFromRegister(ref B, L);
-                    return true;
-
-                case InstructionSet.MOV_C_A:
-                    MoveToRegisterFromRegister(ref C, A);
-                    return true;
-
-                case InstructionSet.MOV_C_B:
-                    MoveToRegisterFromRegister(ref C, B);
-                    return true;
-
-                case InstructionSet.MOV_C_C:
-                    MoveToRegisterFromRegister(ref C, C);
-                    return true;
-
-                case InstructionSet.MOV_C_D:
-                    MoveToRegisterFromRegister(ref C, D);
-                    return true;
-
-                case InstructionSet.MOV_C_E:
-                    MoveToRegisterFromRegister(ref C, E);
-                    return true;
-
-                case InstructionSet.MOV_C_H:
-                    MoveToRegisterFromRegister(ref C, H);
-                    return true;
-
-                case InstructionSet.MOV_C_L:
-                    MoveToRegisterFromRegister(ref C, L);
-                    return true;
-
-                case InstructionSet.MOV_D_A:
-                    MoveToRegisterFromRegister(ref D, A);
-                    return true;
-
-                case InstructionSet.MOV_D_B:
-                    MoveToRegisterFromRegister(ref D, B);
-                    return true;
-
-                case InstructionSet.MOV_D_C:
-                    MoveToRegisterFromRegister(ref D, C);
-                    return true;
-
-                case InstructionSet.MOV_D_D:
-                    MoveToRegisterFromRegister(ref D, D);
-                    return true;
-
-                case InstructionSet.MOV_D_E:
-                    MoveToRegisterFromRegister(ref D, E);
-                    return true;
-
-                case InstructionSet.MOV_D_H:
-                    MoveToRegisterFromRegister(ref D, H);
-                    return true;
-
-                case InstructionSet.MOV_D_L:
-                    MoveToRegisterFromRegister(ref D, L);
-                    return true;
-
-                case InstructionSet.MOV_E_A:
-                    MoveToRegisterFromRegister(ref E, A);
-                    return true;
-
-                case InstructionSet.MOV_E_B:
-                    MoveToRegisterFromRegister(ref E, B);
-                    return true;
-
-                case InstructionSet.MOV_E_C:
-                    MoveToRegisterFromRegister(ref E, C);
-                    return true;
-
-                case InstructionSet.MOV_E_D:
-                    MoveToRegisterFromRegister(ref E, D);
-                    return true;
-
-                case InstructionSet.MOV_E_E:
-                    MoveToRegisterFromRegister(ref E, E);
-                    return true;
-
-                case InstructionSet.MOV_E_H:
-                    MoveToRegisterFromRegister(ref E, H);
-                    return true;
-
-                case InstructionSet.MOV_E_L:
-                    MoveToRegisterFromRegister(ref E, L);
-                    return true;
-
-                case InstructionSet.MOV_H_A:
-                    MoveToRegisterFromRegister(ref H, A);
-                    return true;
-
-                case InstructionSet.MOV_H_B:
-                    MoveToRegisterFromRegister(ref H, B);
-                    return true;
-
-                case InstructionSet.MOV_H_C:
-                    MoveToRegisterFromRegister(ref H, C);
-                    return true;
-
-                case InstructionSet.MOV_H_D:
-                    MoveToRegisterFromRegister(ref H, D);
-                    return true;
-
-                case InstructionSet.MOV_H_E:
-                    MoveToRegisterFromRegister(ref H, E);
-                    return true;
-
-                case InstructionSet.MOV_H_H:
-                    MoveToRegisterFromRegister(ref H, H);
-                    return true;
-
-                case InstructionSet.MOV_H_L:
-                    MoveToRegisterFromRegister(ref H, L);
-                    return true;
-
-                case InstructionSet.MOV_L_A:
-                    MoveToRegisterFromRegister(ref L, A);
-                    return true;
-
-                case InstructionSet.MOV_L_B:
-                    MoveToRegisterFromRegister(ref L, B);
-                    return true;
-
-                case InstructionSet.MOV_L_C:
-                    MoveToRegisterFromRegister(ref L, C);
-                    return true;
-
-                case InstructionSet.MOV_L_D:
-                    MoveToRegisterFromRegister(ref L, D);
-                    return true;
-
-                case InstructionSet.MOV_L_E:
-                    MoveToRegisterFromRegister(ref L, E);
-                    return true;
-
-                case InstructionSet.MOV_L_H:
-                    MoveToRegisterFromRegister(ref L, H);
-                    return true;
-
-                case InstructionSet.MOV_L_L:
-                    MoveToRegisterFromRegister(ref L, L);
-                    return true;
-
-                case InstructionSet.MOV_M_A:
-                    return TryMoveFromRegisterToMemory(A);
-
-                case InstructionSet.MOV_M_B:
-                    return TryMoveFromRegisterToMemory(B);
-
-                case InstructionSet.MOV_M_C:
-                    return TryMoveFromRegisterToMemory(C);
-
-                case InstructionSet.MOV_M_D:
-                    return TryMoveFromRegisterToMemory(D);
-
-                case InstructionSet.MOV_M_E:
-                    return TryMoveFromRegisterToMemory(E);
-
-                case InstructionSet.MOV_M_H:
-                    return TryMoveFromRegisterToMemory(H);
-
-                case InstructionSet.MOV_M_L:
-                    return TryMoveFromRegisterToMemory(L);
-
-                case InstructionSet.MOV_A_M:
-                    return TryMoveFromMemoryToRegister(ref A);
-
-                case InstructionSet.MOV_B_M:
-                    return TryMoveFromMemoryToRegister(ref B);
-
-                case InstructionSet.MOV_C_M:
-                    return TryMoveFromMemoryToRegister(ref C);
-
-                case InstructionSet.MOV_D_M:
-                    return TryMoveFromMemoryToRegister(ref D);
-
-                case InstructionSet.MOV_E_M:
-                    return TryMoveFromMemoryToRegister(ref E);
-
-                case InstructionSet.MOV_H_M:
-                    return TryMoveFromMemoryToRegister(ref H);
-
-                case InstructionSet.MOV_L_M:
-                    return TryMoveFromMemoryToRegister(ref L);
-
                 default:
                     Console.WriteLine("Unknown instruction. Stopping programm!");
                     return false;
             }
+        }
+
+        private bool TryMoveFromTo(byte destinationAdress, byte sourceAdress)
+        {
+            if (destinationAdress == 0b110)
+                return TryMoveFromRegisterToMemory(sourceAdress);
+
+            if (sourceAdress == 0b110)
+                return TryMoveFromMemoryToRegister(destinationAdress);
+
+            if (!registers.ContainsKey(destinationAdress) || !registers.ContainsKey(sourceAdress))
+                return false;
+
+            registers[destinationAdress] = registers[sourceAdress];
+            return true;
+        }
+
+        private bool TryMoveFromRegisterToMemory(byte sourceRegisterAdress)
+        {
+            var memoryAdress = GetMemoryAdressFromRegistersHandL();
+
+            bus.WriteToMemory(memoryAdress, registers[sourceRegisterAdress]);
+            return true;
         }
 
         /// <summary>
@@ -371,43 +157,53 @@ namespace Emulator8085
         /// </summary>
         /// <param name="register">register to which the next byte should be written to</param>
         /// <returns>true, if reading was successfull; otherwise false</returns>
-        private bool TryMoveNextByteInMemoryTo(ref byte register)
+        private bool TryMoveNextByteInMemoryToRegister(byte destinationAdress)
         {
-            IC += 0x0001;
-            byte? data = bus.ReadFromMemory(IC);
+            var data = ReadNextByte();
             
-            if (data == null)
+            if (!registers.ContainsKey(destinationAdress))
                 return false;
-
-            register = (byte)data;
+            
+            registers[destinationAdress] = (byte)data;
             return true;
         }
 
-        private void MoveToRegisterFromRegister(ref byte destinationRegister, byte sourceRegister)
+        private bool TryMoveFromMemoryToRegister(byte destinationRegisterAdress)
         {
-            destinationRegister = sourceRegister;
-        }
-
-        private bool TryMoveFromRegisterToMemory(byte sourceRegister)
-        {
-            ushort memoryAdress = (ushort)(H << 8);
-            memoryAdress = (ushort)(memoryAdress | L);
-
-            return bus.TryWriteToMemory(memoryAdress, sourceRegister);
-        }
-
-        private bool TryMoveFromMemoryToRegister(ref byte destinationRegister)
-        {
-            ushort memoryAdress = (ushort)(H << 8);
-            memoryAdress = (ushort)(memoryAdress | L);
+            var memoryAdress = GetMemoryAdressFromRegistersHandL();
 
             var data = bus.ReadFromMemory(memoryAdress);
 
-            if (data == null)
+            if (!registers.ContainsKey(destinationRegisterAdress))
                 return false;
 
-            destinationRegister = (byte)data;
+            registers[destinationRegisterAdress] = (byte)data;
             return true;
+        }
+
+        private bool TryMoveNextByteInMemoryToMemory()
+        {
+            var memoryAdress = GetMemoryAdressFromRegistersHandL();
+
+            var data = ReadNextByte();
+            bus.WriteToMemory(memoryAdress, data);
+            return true;
+        }
+
+        private ushort GetMemoryAdressFromRegistersHandL()
+        {
+            ushort memoryAdress = (ushort)(registers[(byte)Registers.H] << 8);
+            memoryAdress = (ushort)(memoryAdress | registers[(byte)Registers.L]);
+
+            return memoryAdress;
+        }
+
+        private byte ReadNextByte()
+        {
+            IC += 0x0001;
+            byte data = bus.ReadFromMemory(IC);
+
+            return data;
         }
     }
 }
