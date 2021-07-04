@@ -66,7 +66,7 @@ namespace Emulator8085
         {
             byte? currentInstruction = bus.ReadFromMemory(IC);
 
-            while (currentInstruction != InstructionSet.HALT)
+            while (currentInstruction != (byte)InstructionSet.HALT)
             {
                 PrintRegisters();
                 
@@ -85,13 +85,13 @@ namespace Emulator8085
         private void PrintRegisters()
         {
             Console.WriteLine("-------------------");
-            Console.WriteLine($"A: 0x{registers[(byte)Registers.A]:X2}");
-            Console.WriteLine($"B: 0x{registers[(byte)Registers.B]:X2}");
-            Console.WriteLine($"C: 0x{registers[(byte)Registers.C]:X2}");
-            Console.WriteLine($"D: 0x{registers[(byte)Registers.D]:X2}");
-            Console.WriteLine($"E: 0x{registers[(byte)Registers.E]:X2}");
-            Console.WriteLine($"H: 0x{registers[(byte)Registers.H]:X2}");
-            Console.WriteLine($"L: 0x{registers[(byte)Registers.L]:X2}");
+            Console.WriteLine($"A: 0x{registers[(byte)RegisterAddresses.A]:X2}");
+            Console.WriteLine($"B: 0x{registers[(byte)RegisterAddresses.B]:X2}");
+            Console.WriteLine($"C: 0x{registers[(byte)RegisterAddresses.C]:X2}");
+            Console.WriteLine($"D: 0x{registers[(byte)RegisterAddresses.D]:X2}");
+            Console.WriteLine($"E: 0x{registers[(byte)RegisterAddresses.E]:X2}");
+            Console.WriteLine($"H: 0x{registers[(byte)RegisterAddresses.H]:X2}");
+            Console.WriteLine($"L: 0x{registers[(byte)RegisterAddresses.L]:X2}");
             Console.WriteLine($"IC: 0x{IC:X4}");
             Console.WriteLine($"SP: 0x{SP:X4}");
             Console.WriteLine("-------------------\n");
@@ -104,14 +104,14 @@ namespace Emulator8085
         /// <returns>true, if execution was successfull; otherwise false</returns>
         private bool TryExecuteInstruction(byte instruction)
         {
-            if ((instruction & (byte)Masks.Opcodes.MOV) == InstructionSet.MOV)
+            if ((instruction & (byte)Opcodes.MOV) == (byte)InstructionSet.MOV)
             {
                 var source = (byte)(instruction & 0b00000111);
                 var destination = (byte)((instruction >> 3) & 0b00000111);
                 return TryMoveFromTo(destination, source);
             }
 
-            if ((instruction & (byte)Masks.Opcodes.MVI) == InstructionSet.MVI)
+            if ((instruction & (byte)Opcodes.MVI) == (byte)InstructionSet.MVI)
             {
                 var destination = (byte)((instruction >> 3));
 
@@ -121,8 +121,18 @@ namespace Emulator8085
                 return TryMoveNextByteInMemoryToRegister(destination);
             }
 
+            if ((instruction & (byte)Opcodes.LXI) == (byte)InstructionSet.LXI)
+            {
+                byte destinationAddress = (byte)(instruction >> 4);
+                return TryLoadRegisterPairImmediate(destinationAddress);
+            }
+
             switch (instruction)
             {
+                case (byte)InstructionSet.LDA:
+                    return TryLoadAImmediate();
+                case (byte)InstructionSet.STA:
+                    return TryStoreAImmediate();
                 default:
                     Console.WriteLine("Unknown instruction. Stopping programm!");
                     return false;
@@ -152,6 +162,19 @@ namespace Emulator8085
             return true;
         }
 
+        private bool TryMoveFromMemoryToRegister(byte destinationRegisterAdress)
+        {
+            var memoryAdress = GetMemoryAdressFromRegistersHandL();
+
+            var data = bus.ReadFromMemory(memoryAdress);
+
+            if (!registers.ContainsKey(destinationRegisterAdress))
+                return false;
+
+            registers[destinationRegisterAdress] = (byte)data;
+            return true;
+        }
+
         /// <summary>
         /// Writes the next byte in the RAM to the given register
         /// </summary>
@@ -168,19 +191,6 @@ namespace Emulator8085
             return true;
         }
 
-        private bool TryMoveFromMemoryToRegister(byte destinationRegisterAdress)
-        {
-            var memoryAdress = GetMemoryAdressFromRegistersHandL();
-
-            var data = bus.ReadFromMemory(memoryAdress);
-
-            if (!registers.ContainsKey(destinationRegisterAdress))
-                return false;
-
-            registers[destinationRegisterAdress] = (byte)data;
-            return true;
-        }
-
         private bool TryMoveNextByteInMemoryToMemory()
         {
             var memoryAdress = GetMemoryAdressFromRegistersHandL();
@@ -190,10 +200,60 @@ namespace Emulator8085
             return true;
         }
 
+        private bool TryLoadRegisterPairImmediate(byte registerPairAddress)
+        {
+            var lowData = ReadNextByte();
+            var highData = ReadNextByte();
+
+            switch (registerPairAddress)
+            {
+                case (byte)RegisterPairAddresses.B:
+                    registers[(byte)RegisterAddresses.B] = highData;
+                    registers[(byte)RegisterAddresses.C] = lowData;
+                    return true;
+
+                case (byte)RegisterPairAddresses.D:
+                    registers[(byte)RegisterAddresses.D] = highData;
+                    registers[(byte)RegisterAddresses.E] = lowData;
+                    return true;
+
+                case (byte)RegisterPairAddresses.H:
+                    registers[(byte)RegisterAddresses.H] = highData;
+                    registers[(byte)RegisterAddresses.L] = lowData;
+                    return true;
+
+                case (byte)RegisterPairAddresses.SP:
+                    SP = CombineBytes(lowData, highData);
+                    return true;
+
+                default:
+                    throw new ArgumentException($"Address of register pair not known: {registerPairAddress:X2}");
+            }
+        }
+
+        private bool TryLoadAImmediate()
+        {
+            var lowData = ReadNextByte();
+            var highData = ReadNextByte();
+            var memoryAddress = CombineBytes(lowData, highData);
+            var data = bus.ReadFromMemory(memoryAddress);
+            registers[(byte)RegisterAddresses.A] = data;
+            return true;
+        }
+
+        private bool TryStoreAImmediate()
+        {
+            var lowData = ReadNextByte();
+            var highData = ReadNextByte();
+            var memoryAddress = CombineBytes(lowData, highData);
+            bus.WriteToMemory(memoryAddress, registers[(byte)RegisterAddresses.A]);
+            return true;
+        }
+
         private ushort GetMemoryAdressFromRegistersHandL()
         {
-            ushort memoryAdress = (ushort)(registers[(byte)Registers.H] << 8);
-            memoryAdress = (ushort)(memoryAdress | registers[(byte)Registers.L]);
+            ushort memoryAdress = (ushort)(registers[(byte)RegisterAddresses.H] << 8);
+            memoryAdress = (ushort)(memoryAdress | registers[(byte)RegisterAddresses.L]);
 
             return memoryAdress;
         }
@@ -202,6 +262,15 @@ namespace Emulator8085
         {
             IC += 0x0001;
             byte data = bus.ReadFromMemory(IC);
+
+            return data;
+        }
+
+        private ushort CombineBytes(byte lowData, byte highData)
+        {
+            ushort data = highData;
+            data = (ushort)(data << 8);
+            data = (ushort)(data | lowData);
 
             return data;
         }

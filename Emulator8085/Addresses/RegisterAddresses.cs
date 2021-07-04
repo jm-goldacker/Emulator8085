@@ -1,6 +1,6 @@
 ﻿namespace Emulator8085.Masks
 {
-    enum Registers
+    enum RegisterAddresses
     {
         A = 0b111,
         B = 0b000,
