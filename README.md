@@ -20,7 +20,7 @@ This project is currently not being maintained, because it is a lot of work to i
 
 ## The MC 85/2
 This project is inspired by the MC 85/2 computer, which uses the Intel 8085 and the 6116 RAM.
-The MC 85/2 is a DIY computer. Its purpose is to learn the fundementals on how a computer works internally. 
+The MC 85/2 is a DIY computer. Its purpose is to learn the fundamentals on how a computer works internally. 
 
 The instructions to build and programm this computer are described in the book "Lern-Computer", written by Waldemar Willner and published by "Studienverl. Brockmeyer".
 
@@ -37,4 +37,4 @@ The emulator currently supports following instruction
 * MVI H XXX (Move byte XXX to register H)
 * MVI L XXX (Move byte XXX to register L)
 
-More instructions on how to run and program the emulator follow soon!
+More instructions on how to run and program the emulator will follow soon!
